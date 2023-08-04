@@ -1,7 +1,3 @@
-> _👷🏽 TODO: This project is made with [publish-ts](https://github.com/trcps/publish-ts), read the docs to learn more._
-
-> _👷🏽 TODO: Read all the sections marked with "👷🏽 TODO", do them, and remove them from this README._
-
 <div align="right">
 
 [![npm bundle size](https://img.shields.io/bundlephobia/minzip/andern@latest?color=black&label=&style=flat-square)](https://bundlephobia.com/package/andern@latest)
@@ -10,19 +6,25 @@
 
 </div>
 
-<img src="./logo-dark.svg#gh-dark-mode-only" height="42px"/>
-<img src="./logo-light.svg#gh-light-mode-only" height="42px"/>
+<img src="./logo-dark.svg#gh-dark-mode-only" height="51px"/>
+<img src="./logo-light.svg#gh-light-mode-only" height="51px"/>
 
 change propagation for object trees
 
 ```js
-// a nice code example here
-// would be pretty nice!
+import { Node } from 'andern'
 
-import { andern } from 'andern'
+const node = new Node({
+  people: [
+    { name: 'John', age: 20 },
+    { name: 'Jane', age: 21 },
+  ]
+})
 
-console.log(andern().msg)
+node.child('/people/0').set('/age', 32)
 ```
+
+> 🚧🚧 **DO NOT USE**, _work in progress_
 
 <br>
 
@@ -46,22 +48,44 @@ npm i andern
 Browser / [Deno](https://deno.land):
 
 ```js
-import { andern } from 'https://esm.sh/andern'
+import { Node } from 'https://esm.sh/andern'
 ```
-> _👷🏽 TODO: add the most important necessary imports from andern here._
 
 <br>
 
 # Usage
 
-> _👷🏽 TODO: explain in details what andern does._
+> 🚧🚧 WORK IN PROGRESS 🚧🚧
+
+This library offers utilities to handle changes in object trees, based on [JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901), [JSON Patch](https://jsonpatch.com) and [RxJS](https://rxjs.dev).
 
 ```js
-// perhaps with some nice code examples.
+import { Node } from 'andern'
 
-import { andern } from 'andern'
+const node = new Node({
+  people: [
+    { name: 'John', age: 20, title: 'Mr.' },
+    { name: 'Jane', age: 21 },
+  ]
+})
 
-console.log(andern().msg)
+const child = node.child('/people/0')
+child.next({ name: 'John', age: 32 })
+child.set('/age', 33)
+child.patch({
+  op: 'remove',
+  path: '/title',
+})
+
+node.read('/people/0/age').subscribe(console.log)
+
+const parent = new Node({
+  company: 'X',
+  org: {}
+})
+
+node.connect(parent, '/org')
+parent.read('/org/people/0/age').subscribe(console.log)
 ```
 
 <br>
