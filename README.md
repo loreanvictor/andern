@@ -85,7 +85,7 @@ const parent = new Node({
   org: {}
 })
 
-node.connect(parent, '/org')
+parent.adopt('/org', node)
 parent.read('/org/people/0/age').subscribe(console.log)
 ```
 
