@@ -1,0 +1,51 @@
+main {
+  text-align: center;
+}
+
+.node {
+  text-align: center;
+  display: inline-block;
+  vertical-align: top;
+  margin: 0 8px;
+}
+
+.circle {
+  width: 64px;
+  height: 64px;
+  background: white;
+  border-radius: 32px;
+  color: black;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  opacity: 0.8;
+  font-weight: bold;
+  transition: background 1s, opacity 1s;
+}
+
+.circle:hover {
+  opacity: 1;
+  transition: opacity .1s, background 1s;
+}
+
+.circle.changed {
+  background: #C70039;
+  opacity: 1;
+  transition: opacity .1s, background .1s;
+}
+
+.dongle {
+  width: 2px;
+  height: 16px;
+  background: white;
+  margin: 0 auto;
+  opacity: 0.5;
+}
+
+.child-connector {
+  margin: 0 16px;
+  height: 2px;
+  background: white;
+  opacity: 0.25;
+}

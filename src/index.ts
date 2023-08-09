@@ -1,11 +1,15 @@
 export * from './types'
+export * from './readonly'
+export * from './node'
+export * from './echo'
 
+import { JsonObject } from 'json-pointer'
 
-import { Message } from './types'
+import { createEcho } from './echo'
+import { Node } from './node'
 
+export const createRoot = <T extends JsonObject>(initial: T) => {
+  const echo = createEcho()
 
-export function andern(): Message {
-  return {
-    msg: 'Hellow, this is andern!'
-  }
+  return new Node(initial, echo, echo)
 }
