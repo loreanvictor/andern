@@ -34,7 +34,7 @@ root.child('/people').patch({ op: 'remove', path: '/1/age' })
 
 <div align="right">
 
-[▶ TRY IT](https://codepen.io/lorean_victor/pen/VwVoOdM?editors=0012)
+[**▷ TRY IT**](https://codepen.io/lorean_victor/pen/VwVoOdM?editors=0012)
 
 </div>
 
