@@ -10,6 +10,7 @@ export type PatchChannel = Observer<Patch>
 export interface ReadOnlyNodeLike<T> extends Observable<T> {
   get patches(): PatchStream
   child(path: string): ReadOnlyNodeLike<any>
+  read(path: string): ReadOnlyNodeLike<any>
 }
 
 

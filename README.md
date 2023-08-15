@@ -9,23 +9,34 @@
 <img src="./logo-dark.svg#gh-dark-mode-only" height="51px"/>
 <img src="./logo-light.svg#gh-light-mode-only" height="51px"/>
 
-change propagation for object trees
+`ändern` helps with tracking changes across an object tree. Use it to wrap and modify an object, and you'd get [observables](https://rxjs.dev/guide/observable) notifying you when [some part of the object](https://datatracker.ietf.org/doc/html/rfc6901) changes, and [what the changes are](https://jsonpatch.com).
 
 ```js
-import { Node } from 'andern'
+import { createRoot } from 'andern'
 
-const node = new Node({
+const root = createRoot({
   people: [
     { name: 'John', age: 20 },
     { name: 'Jane', age: 21 },
   ]
 })
 
-node.child('/people/1/age').subscribe(console.log)
-node.child('/people/0').set('/age', 32)
+// 👇 subscribe to a part of the tree
+root.child('/people/1').subscribe(console.log)
+
+// 👇 manually set a specific part of the tree
+root.child('/people/1/age').set('', 32)
+
+// 👇 apply a patch to a specific part of the tree
+root.child('/people').patch({ op: 'remove', path: '/1/age' })
+
 ```
 
-> 🚧🚧 **DO NOT USE**, _work in progress_
+<div align="right">
+
+[▶ TRY IT](https://codepen.io/lorean_victor/pen/VwVoOdM?editors=0012)
+
+</div>
 
 <br>
 
@@ -49,44 +60,81 @@ npm i andern
 Browser / [Deno](https://deno.land):
 
 ```js
-import { Node } from 'https://esm.sh/andern'
+import { createRoot } from 'https://esm.sh/andern'
 ```
 
 <br>
 
 # Usage
 
-> 🚧🚧 WORK IN PROGRESS 🚧🚧
+`ändern` helps with propagating and tracking changes across some object (for example, managing application state). It treats the object as a tree: the root represents the whole object, and child nodes representing various parts of it. You can subscribe to different parts of the tree, modify or patch them, etc, and `ändern` will make sure that all changes are propagated exactly to the correct subscribers.
 
-This library offers utilities to handle changes in object trees, based on [JSON Pointer](https://www.rfc-editor.org/rfc/rfc6901), [JSON Patch](https://jsonpatch.com) and [RxJS](https://rxjs.dev).
 
+👉 Create a root node:
 ```js
-import { Node } from 'andern'
+import { createRoot } from 'andern'
 
-const node = new Node({
+const root = createRoot({
   people: [
-    { name: 'John', age: 20, title: 'Mr.' },
+    { name: 'John', age: 20 },
     { name: 'Jane', age: 21 },
   ]
 })
+```
+<br>
 
-const child = node.child('/people/0')
-child.next({ name: 'John', age: 32 })
-child.set('/age', 33)
-child.patch({
-  op: 'remove',
-  path: '/title',
-})
+👉 Get a child node:
+```js
+const john = root.child('/people/0')
+```
 
-node.read('/people/0/age').subscribe(console.log)
+> Child nodes are specified in [JSON Pointer](https://gregsdennis.github.io/Manatee.Json/usage/pointer.html) format.
 
-const parent = new Node({
-  company: 'X',
-  org: {}
-})
+<br>
 
-parent.adopt('/org', node)
-parent.read('/org/people/0/age').subscribe(console.log)
+👉 Subscribe to a node's values:
+```js
+john.subscribe(console.log)
+root.child('/people/1').subscribe(console.log)
+```
+
+> Each node is an [observable](https://rxjs.dev/guide/observable) that emits the current value of the node whenever it changes.
+
+<br>
+
+👉 Update the node:
+```js
+john.set('/name', 'Johnny')
+```
+```js
+john.add('/title', 'Dr.')
+```
+```js
+john.remove('/age')
+```
+
+> To change the whole object, use `''` as the path. Alternatively, you can use `node.next(...)`, as each node is also an [observer](https://rxjs.dev/guide/observer).
+
+<br>
+
+👉 Subscribe to its changes:
+```js
+john.patches.subscribe(console.log)
+```
+
+👉 Apply a patch:
+```js
+john.patch({ op: 'replace', path: '/name', value: 'Johnny' })
+```
+
+> Changes are expressed in [JSON Patch](https://jsonpatch.com) format.
+
+<br>
+
+👉 Use `.read()` method to get readonly nodes:
+
+```js
+const john = root.read('/people/0')
 ```
 
 <br>

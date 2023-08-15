@@ -12,9 +12,9 @@ describe(Node, () => {
     const cb2 = jest.fn()
     const cb3 = jest.fn()
 
-    root.read('/foo').subscribe(cb1)
+    root.child('/foo').subscribe(cb1)
     root.child('/foo').subscribe(cb2)
-    root.child('/baz/0/fluff').subscribe(cb3)
+    root.read('/baz/0').read('/fluff').subscribe(cb3)
 
     root.set('/foo', 'qux')
 

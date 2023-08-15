@@ -14,7 +14,7 @@ export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeL
     super(initial, downstream)
   }
 
-  read(path: string): ReadOnlyNodeLike<any> {
+  override read(path: string): ReadOnlyNodeLike<any> {
     return super.child(path)
   }
 

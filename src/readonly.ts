@@ -31,6 +31,10 @@ export class ReadOnlyNode<T extends JsonObject> extends Observable<T> implements
     return new ReadOnlyNode(this.childValue(path), this.childStream(path))
   }
 
+  read(path: string): ReadOnlyNodeLike<any> {
+    return this.child(path)
+  }
+
   protected childValue(path: string): any {
     return get(this.value, path)
   }
