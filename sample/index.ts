@@ -39,9 +39,9 @@ const render = (obj, path = '') => {
   }
 }
 
-document.querySelector('main').innerHTML = render(root)
+document.querySelector('main')!.innerHTML = render(root)
 document.querySelectorAll('.circle').forEach(el => {
-  const path = el.getAttribute('path')
+  const path = el.getAttribute('path')!
 
   node.read(path).subscribe((v) => {
     el.classList.add('changed')

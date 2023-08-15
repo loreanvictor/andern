@@ -1,5 +1,5 @@
 import { JsonObject } from 'json-pointer'
-import { compare } from 'fast-json-patch'
+import { Operation, compare } from 'fast-json-patch'
 
 import { ReadOnlyNode } from './readonly'
 import { NodeLike, Patch, PatchChannel, PatchStream, ReadOnlyNodeLike } from './types'
@@ -26,8 +26,12 @@ export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeL
     )
   }
 
-  patch(patch: Patch): this {
-    this.upstream.next(patch)
+  patch(patch: Patch | Operation): this {
+    if (Array.isArray(patch)) {
+      this.upstream.next(patch)
+    } else {
+      this.upstream.next([patch])
+    }
 
     return this
   }

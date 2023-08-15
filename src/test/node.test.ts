@@ -137,4 +137,23 @@ describe(Node, () => {
 
     expect(cb).toHaveBeenCalledTimes(0)
   })
+
+  test('accepts single operations for patching.', () => {
+    const echo = createEcho()
+    const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, echo, echo)
+
+    const cb1 = jest.fn()
+    const cb2 = jest.fn()
+
+    root.read('/foo').subscribe(cb1)
+    root.child('/baz/0/fluff').subscribe(cb2)
+
+    root.patch({ op: 'replace', path: '/foo', value: 'qux' })
+
+    expect(cb1).toHaveBeenCalledTimes(2)
+    expect(cb2).toHaveBeenCalledTimes(1)
+    expect(cb1).toHaveBeenNthCalledWith(1, 'bar')
+    expect(cb1).toHaveBeenNthCalledWith(2, 'qux')
+    expect(cb2).toHaveBeenNthCalledWith(1, 42)
+  })
 })

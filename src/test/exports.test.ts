@@ -1,4 +1,6 @@
-import { createEcho, ReadOnlyNode, ReadOnlyNodeLike, NodeLike, Patch, PatchChannel, PatchStream } from '../index'
+import {
+  createEcho, ReadOnlyNode, ReadOnlyNodeLike, NodeLike, Patch, PatchChannel, PatchStream,
+} from '../index'
 
 
 test('everything is exported.', () => {
