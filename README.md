@@ -186,33 +186,9 @@ function createRoot<T>(value: T) {
 
 A child node is created by minor modifications to the up and downstreams of the parent node. Patches coming from child nodes will have their path attached to their operations before being up-propagated. Patches coming from downstream will first be checked to match the child node's path, and then have their path stripped before being down-propagated.
 
-```ts
-const parent = createRoot()
-const child = parent.child('/a/0')
-
-child.set(2)
-//
-// 1️⃣ the child sends
-//    { op: 'replace', path: '', value: 2 }
-//    to the upstream.
-//
-// 2️⃣ the parent sends
-//    { op: 'replace', path: '/a/0', value: 2 }
-//    to the upstream.
-//
-// 3️⃣ parent is root and its upstream is echo.
-//    it receives the same patch, applies it to its own
-//    value, notifying subscribers.
-//
-// 4️⃣ parent checks if the path matches the child's path,
-//    which it does. the parent corrects the path and
-//    sends this patch to the child's downstream:
-//    { op: 'replace', path: '', value: 2 }
-//
-// 5️⃣ the child receives the patch, applies it to its own
-//    value, notifying subscribers.
-//
-```
+<div align="center">
+<img src="./readme-diagram.svg" width="512px"/>
+</div>
 
 👉 [**See this in action**](https://codepen.io/lorean_victor/full/vYvBZKa).
 
