@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 14 14" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>step-7</title>
+    <g id="readme-diagram" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g transform="translate(-307.000000, -171.000000)" id="events">
+            <g transform="translate(10.000000, 12.932188)">
+                <g id="event-7" transform="translate(223.000000, 158.067812)">
+                    <g id="step-7" transform="translate(74.000000, 0.000000)">
+                        <circle id="backdrop" fill="#3C7CFF" cx="7" cy="7" r="7"></circle>
+                        <g id="index" transform="translate(4.392578, 3.954102)" fill="#FFFFFF" fill-rule="nonzero">
+                            <path d="M1.58691406,7.1484375 C1.90429688,7.1484375 2.08496094,7.03125 2.24609375,6.71875 L4.85839844,1.67480469 C5.04882812,1.30371094 5.13671875,1.06933594 5.13671875,0.805664062 C5.13671875,0.302734375 4.77050781,0 4.2578125,0 L0.610351562,0 C0.258789062,0 0,0.229492188 0,0.581054688 C0,0.9375 0.258789062,1.171875 0.610351562,1.171875 L3.64746094,1.171875 L3.64746094,1.20117188 L1.04003906,6.08398438 C0.952148438,6.24511719 0.913085938,6.37695312 0.913085938,6.54785156 C0.913085938,6.88964844 1.171875,7.1484375 1.58691406,7.1484375 Z" id="Path"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

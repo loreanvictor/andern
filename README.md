@@ -186,11 +186,40 @@ function createRoot<T>(value: T) {
 
 A child node is created by minor modifications to the up and downstreams of the parent node. Patches coming from child nodes will have their path attached to their operations before being up-propagated. Patches coming from downstream will first be checked to match the child node's path, and then have their path stripped before being down-propagated.
 
+👉 [**See this in action**](https://codepen.io/lorean_victor/full/vYvBZKa).
+
 <div align="center">
-<img src="./readme-diagram.svg" width="512px"/>
+<img src="./misc/readme-diagram.svg" width="640px"/>
 </div>
 
-👉 [**See this in action**](https://codepen.io/lorean_victor/full/vYvBZKa).
+> - ![0](./misc/diagram-red-0.svg) a patch is applied to observer #2.
+> - ![1](./misc/diagram-orange-1.svg) observer #2 up-propagates the following patch to its parent, observer #1:
+>    ```json
+>    { "path": "", "op": "replace", "value": 32 }
+>    ```
+> - ![2](./misc/diagram-orange-2.svg) observer #1 up-propagates a similar patch with updated path to its parent, the root node:
+>   ```json
+>   { "path": "/0/age", ... }
+>   ```
+> - ![3](./misc/diagram-orange-3.svg) root up-propagates a similar patch with updated path:
+>   ```json
+>   { "path": "/people/0/age", ... }
+>   ```
+> - ![4](./misc/diagram-green-4.svg) the patch is echoed back to root.
+> - ![5](./misc/diagram-blue-5.svg) root notifies all subscribers of change.
+> - ![5](./misc/diagram-green-5.svg) root down-propagates similar patches with altered paths to its children, observer #3 and observer #1, respectively:
+>   ```json
+>   { "path": "/age", ... }
+>   ```
+>   ```json
+>   { "path": "/0/age", ... }
+>   ```
+> - ![6](./misc/diagram-blue-6.svg) observers #3 and #1 notify their subscribers of change.
+> - ![6](./misc/diagram-green-6.svg) observer #1 down-propagates a similar patch with altered path to its child, observer #2:
+>   ```json
+>   { "path": "", ... }
+>   ```
+> - ![7](./misc/diagram-blue-7.svg) observer #2 notifies its subscribers of change.
 
 <br>
 
