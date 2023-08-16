@@ -189,37 +189,38 @@ A child node is created by minor modifications to the up and downstreams of the 
 👉 [**See this in action**](https://codepen.io/lorean_victor/full/vYvBZKa).
 
 <div align="center">
-<img src="./misc/readme-diagram.svg" width="640px"/>
+<img src="./misc/readme-diagram.svg#gh-dark-mode-only" width="640px"/>
+<img src="./misc/readme-diagram-light.svg#gh-light-mode-only" width="640px"/>
 </div>
 
-> - ![0](./misc/diagram-red-0.svg) a patch is applied to observer #2.
-> - ![1](./misc/diagram-orange-1.svg) observer #2 up-propagates the following patch to its parent, observer #1:
->    ```json
->    { "path": "", "op": "replace", "value": 32 }
->    ```
-> - ![2](./misc/diagram-orange-2.svg) observer #1 up-propagates a similar patch with updated path to its parent, the root node:
->   ```json
->   { "path": "/0/age", ... }
->   ```
-> - ![3](./misc/diagram-orange-3.svg) root up-propagates a similar patch with updated path:
->   ```json
->   { "path": "/people/0/age", ... }
->   ```
-> - ![4](./misc/diagram-green-4.svg) the patch is echoed back to root.
-> - ![5](./misc/diagram-blue-5.svg) root notifies all subscribers of change.
-> - ![5](./misc/diagram-green-5.svg) root down-propagates similar patches with altered paths to its children, observer #3 and observer #1, respectively:
->   ```json
->   { "path": "/age", ... }
->   ```
->   ```json
->   { "path": "/0/age", ... }
->   ```
-> - ![6](./misc/diagram-blue-6.svg) observers #3 and #1 notify their subscribers of change.
-> - ![6](./misc/diagram-green-6.svg) observer #1 down-propagates a similar patch with altered path to its child, observer #2:
->   ```json
->   { "path": "", ... }
->   ```
-> - ![7](./misc/diagram-blue-7.svg) observer #2 notifies its subscribers of change.
+> ![0](./misc/diagram-red-0.svg) a patch is applied to observer #2. \
+> ![1](./misc/diagram-orange-1.svg) observer #2 up-propagates the following patch to its parent, observer #1:
+>  ```js
+>  { "path": "", "op": "replace", "value": 32 }
+>  ```
+> ![2](./misc/diagram-orange-2.svg) observer #1 up-propagates a similar patch with updated path to its parent, the root node:
+> ```js
+> { "path": "/0/age", ... }
+> ```
+> ![3](./misc/diagram-orange-3.svg) root up-propagates a similar patch with updated path:
+> ```js
+> { "path": "/people/0/age", ... }
+> ```
+> ![4](./misc/diagram-green-4.svg) the patch is echoed back to root. \
+> ![5](./misc/diagram-blue-5.svg) root notifies all subscribers of change. \
+> ![5](./misc/diagram-green-5.svg) root down-propagates similar patches with altered paths to its children, observer #3 and observer #1, respectively:
+> ```js
+> { "path": "/age", ... }
+> ```
+> ```js
+> { "path": "/0/age", ... }
+> ```
+> ![6](./misc/diagram-blue-6.svg) observers #3 and #1 notify their subscribers of change. \
+> ![6](./misc/diagram-green-6.svg) observer #1 down-propagates a similar patch with altered path to its child, observer #2:
+> ```js
+> { "path": "", ... }
+> ```
+> ![7](./misc/diagram-blue-7.svg) observer #2 notifies its subscribers of change.
 
 <br>
 
