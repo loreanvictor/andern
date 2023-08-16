@@ -45,6 +45,7 @@ root.child('/people').patch({ op: 'remove', path: '/1/age' })
 - [Contents](#contents)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Advanced Usage](#advanced-usage)
 - [Contribution](#contribution)
 
 <br>
@@ -136,6 +137,84 @@ john.patch({ op: 'replace', path: '/name', value: 'Johnny' })
 ```js
 const john = root.read('/people/0')
 ```
+
+<br>
+
+# Advanced Usage
+
+The core construct of `ändern` is the `Node` class. It represents a node in the tree, and is responsible for propagating changes to its subscribers.
+
+```ts
+class Node<T>
+  extends Observable<T>
+  implements Observer<T> {
+
+  constructor(
+    initial:  T,
+    downstream: Observable<Patch>,
+    upstream: Observer<Patch>,
+  );
+
+  read(path: string): ReadonlyNode<T>;
+  child(path: string): Node<T>;
+  patch(patch: Patch | Operation): this;
+  set(path: string, value: any): this;  
+  remove(path: string): this;
+
+  // and some inherited methods
+}
+```
+
+For creating a `Node`, you need an initial value, an _upstream_ and a _downstream_:
+
+- _downstream_ is an observable of patches, determining changes that should be applied to the node's value, and propagated to its children.
+- _upstream_ is an observer of patches. When changes are applied to the node, they are propagated to the upstream, so that all affected nodes are notified.
+
+The node's value is patched ONLY when a patch comes down the downstream. Invoking `.set()`, `.patch()` or `.remove()` methods merely sends a patch upstream and DOES NOT apply it to the value of the node. The changes are then bounced back at the root of the tree and down-propagated to all affected nodes, including the node that initiated the change. This allows for custom upstream behavior that conducts validation and discards invalid changes.
+
+This is how the root node is created (via `createRoot()`):
+
+```ts
+function createRoot<T>(value: T) {
+  // 👇 this subject emits any incoming patches.
+  const echo = new Subject<Patch>()
+  const root = new Node(value, echo, echo)
+
+  return root
+}
+```
+
+A child node is created by minor modifications to the up and downstreams of the parent node. Patches coming from child nodes will have their path attached to their operations before being up-propagated. Patches coming from downstream will first be checked to match the child node's path, and then have their path stripped before being down-propagated.
+
+```ts
+const parent = createRoot()
+const child = parent.child('/a/0')
+
+child.set(2)
+//
+// 1️⃣ the child sends
+//    { op: 'replace', path: '', value: 2 }
+//    to the upstream.
+//
+// 2️⃣ the parent sends
+//    { op: 'replace', path: '/a/0', value: 2 }
+//    to the upstream.
+//
+// 3️⃣ parent is root and its upstream is echo.
+//    it receives the same patch, applies it to its own
+//    value, notifying subscribers.
+//
+// 4️⃣ parent checks if the path matches the child's path,
+//    which it does. the parent corrects the path and
+//    sends this patch to the child's downstream:
+//    { op: 'replace', path: '', value: 2 }
+//
+// 5️⃣ the child receives the patch, applies it to its own
+//    value, notifying subscribers.
+//
+```
+
+👉 [**See this in action**](https://codepen.io/lorean_victor/full/vYvBZKa).
 
 <br>
 
