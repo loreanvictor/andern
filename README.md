@@ -252,9 +252,20 @@ const john = root.child('/people/0/name')
 
 <br>
 
-When a node is requested to change (through its `.set()`, `.remove()`, `.patch()`, or `.next()` methods), it will calculate the necessary changes and send them to its _upstream_. In case of `.next()`, it diffs the current value and the _next_ value for calculating the patch (so its slower to use `.next()` compared to other methods).
+When a change is requested (through its `.set()`, `.remove()`, `.patch()`, or `.next()` methods), the node will NOT apply the change, but will calculate the necessary changes and sends them, as a patch, to its _upstream_ (i.e. its parent).
 
-The calculated patch won't be applied immediately, it will be sent to the _upstream_ first, where the parent will correct the _path_ of the patch, and send it upwards again. Eventually, the patch is bounced back by the root node (if it is a valid change), and will be downpropagated across the tree to nodes with a matching path (with the path again being corrected for each child node that receives the patch). During this process, the originating node will also receive the same patch from its _downstream_, applying the patch and notifying its subscribers.
+> **WARNING**
+>
+> `.next()` requires to diff the node's value with the given value to calculate the necessary patch, making it computationally expensive compared to other mutation methods.
+
+The parent updates the patch's _path_ to reflect the address of the child sending it, then sends it through its own upstream. Eventually, it reach the root node and is bounced back (if they are valid).
+
+> 💡 _The root note is like other nodes, except its downstream and upstream are the same, resulting in it bouncing back any received patches. The root created by `createdRoot()` is a [`SafeNode`](#safety), meaning it will also check validity of bounced patches._
+
+The patch is then downpropagated by each node to its matching children, correcting the path for recipient children as well. During this, the originating node will also receive the same patch, applying it and notifying subscribers.
+
+
+> 💡 _This is basically a master / replica model, where the root node acts as the master and all other nodes are replicas. The root node determines the final **correct** order of changes to be applied to all nodes, resolving potential conflicts._
 
 The whole process looks like this (you can also checkout the [live demo](https://codepen.io/lorean_victor/full/vYvBZKa)):
 
