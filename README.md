@@ -173,9 +173,9 @@ class Node<T>
 
 To create a `Node`, you need an _upstream_ and a _downstream_:
 
-- _downstream_ should be a [`PatchStream`](./src/types.ts) (i.e. [`Observable`](https://rxjs.dev/guide/observable)`<`[`Patch`](https://jsonpatch.com)`>`), through which the parent informs the node of changes to its value.
+- _downstream_ should be a [`PatchStream`](./src/types.ts) (i.e. [`Observable`](https://rxjs.dev/guide/observable)[`<Patch>`](https://jsonpatch.com)), through which the parent informs the node of changes to its value.
 
-- _upstream_ should be a [`PatchChannel`](./src/types.ts) (i.e. [`Observer`](https://rxjs.dev/guide/observer)`<`[`Patch`](https://jsonpatch.com)`>`), through which the node informs its parent of requested changes to its value.
+- _upstream_ should be a [`PatchChannel`](./src/types.ts) (i.e. [`Observer`](https://rxjs.dev/guide/observer)[`<Patch>`](https://jsonpatch.com)), through which the node informs its parent of requested changes to its value.
 
 <br>
 
@@ -221,7 +221,7 @@ const root = new SafeNode(
 
 # How it Works
 
-`ändern` uses trees, composed of [`Node`s](#nodes), for tracking changes across objects. Each node is an [`Observable`](https://rxjs.dev/guide/observable) and an [`Observer`](https://rxjs.dev/guide/observer) for a designated part of the tree, represented by some [JSON pointer](https://gregsdennis.github.io/Manatee.Json/usage/pointer.html). For an object (tree) like this:
+`ändern` uses trees, composed of [`Node`](#nodes)s, for tracking changes across objects. Each node is an [`Observable`](https://rxjs.dev/guide/observable) and an [`Observer`](https://rxjs.dev/guide/observer) for a designated part of the tree, represented by some [JSON pointer](https://gregsdennis.github.io/Manatee.Json/usage/pointer.html). For an object (tree) like this:
 
 ```js
 const object = {
