@@ -252,7 +252,7 @@ const john = root.child('/people/0/name')
 
 > **IMPORTANT**
 >
-> `ändern` does not track changes made to objects directly, i.e it does not create proxies, or alter the original objects in any way. A `Node` can only track changes that are applied via some other nodes in the same tree.
+> `ändern` does not track changes made to objects directly. A `Node` can only track changes that are applied by (or via) other nodes in the same tree.
 
 <br>
 
@@ -268,15 +268,15 @@ When a change is requested (through `.set()`, `.remove()`, `.patch()`, or `.next
 
 The parent updates the patch's _path_ so that it reflects the child it originated from, then sends it to its own parent. Eventually, the patch reaches the root and is bounced back ([if valid](#safety)).
 
-> 💡 _The root is like other nodes, except its downstream and upstream are the same (a [`Subject`](https://rxjs.dev/guide/subject)), resulting in the root bouncing back patches it receives. The root created by `createdRoot()` is a [`SafeNode`](#safety), so it also checks validity of bounced patches, dropping invalid ones._
+> 💡 _The root is like other nodes, except its downstream and upstream are the same (a [`Subject`](https://rxjs.dev/guide/subject)), resulting in the root bouncing back incoming patches. The root created by `createdRoot()` is a [`SafeNode`](#safety), so it also checks validity of bounced patches, dropping invalid ones._
 
 <br>
 
 ### Step 3: Down-propagation
 
-Starting with the root, each node, then sends the patch to its matching children, recorrecting the path as well. Each node also applies the patch to its value and notifies its subscribers. The patch eventually reaches the originating node, which does the same.
+Starting with the root, each node then sends the patch to its matching children, recorrecting the path for each matching child. Each node also applies the patch and notifies its subscribers. The patch eventually reaches the originating node, which does the same.
 
-> 💡 _This is basically a master / replica model, where the root node acts as the master and all other nodes are replicas. The root node determines the final **correct** order of changes to be applied to all nodes, resolving potential conflicts._
+> 💡 _This is basically a master / replica model, where the root node acts as the master and all other nodes are replicas. The root node determines the **correct** order of changes, resolving potential conflicts._
 
 <br>
 
@@ -287,7 +287,7 @@ The whole process looks like this (you can also checkout the [live demo](https:/
 <img src="./misc/readme-diagram-light.svg#gh-light-mode-only" width="640px"/>
 </div>
 
-> ![0](./misc/diagram-red-0.svg) a patch is applied to observer #2. \
+> ![0](./misc/diagram-red-0.svg) a patch is applied to observer #2 (for example, setting its value to `32`) \
 > ![1](./misc/diagram-orange-1.svg) observer #2 up-propagates the following patch to its parent, observer #1:
 >  ```js
 >  { "path": "", "op": "replace", "value": 32 }
