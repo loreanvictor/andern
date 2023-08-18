@@ -46,6 +46,9 @@ root.child('/people').patch({ op: 'remove', path: '/1/age' })
 - [Installation](#installation)
 - [Usage](#usage)
 - [Advanced Usage](#advanced-usage)
+  - [Nodes](#nodes)
+  - [Safety](#safety)
+- [How it Works](#how-it-works)
 - [Contribution](#contribution)
 
 <br>
@@ -142,7 +145,9 @@ const john = root.read('/people/0')
 
 # Advanced Usage
 
-The core construct of `ändern` is the `Node` class. It represents a node in the tree, and is responsible for propagating changes to its subscribers.
+### Nodes
+
+The core construct of `ändern` is the [`Node`](./src/node.ts) class, which tracks and notifies of changes in some part of an object tree.
 
 ```ts
 class Node<T>
@@ -151,12 +156,13 @@ class Node<T>
 
   constructor(
     initial:  T,
-    downstream: Observable<Patch>,
-    upstream: Observer<Patch>,
+    downstream: PatchStream,
+    upstream: PatchChannel,
   );
 
   read(path: string): ReadonlyNode<T>;
   child(path: string): Node<T>;
+  channel(): Observer<Patch>;
   patch(patch: Patch | Operation): this;
   set(path: string, value: any): this;  
   remove(path: string): this;
@@ -165,28 +171,92 @@ class Node<T>
 }
 ```
 
-For creating a `Node`, you need an initial value, an _upstream_ and a _downstream_:
+To create a `Node`, you need an _upstream_ and a _downstream_:
 
-- _downstream_ is an observable of patches, determining changes that should be applied to the node's value, and propagated to its children.
-- _upstream_ is an observer of patches. When changes are applied to the node, they are propagated to the upstream, so that all affected nodes are notified.
+- _downstream_ should be a [`PatchStream`](./src/types.ts) (i.e. [`Observable`](https://rxjs.dev/guide/observable)`<`[`Patch`](https://jsonpatch.com)`>`), through which the parent informs the node of changes to its value.
 
-The node's value is patched ONLY when a patch comes down the downstream. Invoking `.set()`, `.patch()` or `.remove()` methods merely sends a patch upstream and DOES NOT apply it to the value of the node. The changes are then bounced back at the root of the tree and down-propagated to all affected nodes, including the node that initiated the change. This allows for custom upstream behavior that conducts validation and discards invalid changes.
+- _upstream_ should be a [`PatchChannel`](./src/types.ts) (i.e. [`Observer`](https://rxjs.dev/guide/observer)`<`[`Patch`](https://jsonpatch.com)`>`), through which the node informs its parent of requested changes to its value.
 
-This is how the root node is created (via `createRoot()`):
+<br>
+
+When a node is requested to change (through its `.set()`, `.remove()`, `.patch()`, or `.next()` methods), it will calculate the necessary changes and send them to _upstream_. It will apply the changes when they are received from the _downstream_, notifying subscribers ([read more](#how-it-works)).
+
+Use this to create nodes with custom behavior. For example, this is a _root node_ that debounces incoming changes:
 
 ```ts
-function createRoot<T>(value: T) {
-  // 👇 this subject emits any incoming patches.
-  const echo = new Subject<Patch>()
-  const root = new Node(value, echo, echo)
+import { Node } from 'andern'
+import { Subject, debounceTime } from 'rxjs'
 
-  return root
+const bounce = new Subject()
+const root = new Node(
+  { /* some initial value */},
+  bounce.pipe(debounceTime(100)),
+  bounce,
+)
+```
+
+<div align="right">
+
+[**▷ TRY IT**](https://codepen.io/lorean_victor/pen/rNoNwVO?editors=1010)
+
+</div>
+
+### Safety
+
+A `Node` receiving a patch that it can't apply will result in an error, closing the stream. If you want to ignore such erroneous patches, use `SafeNode` class instead.
+
+```ts
+import { SafeNode } from 'andern'
+
+const root = new SafeNode(
+  /* ... */
+)
+```
+
+<br>
+
+> `createRoot()` uses `SafeNode` by default, so you don't need to worry about safety in normal use cases. You need to think about it only if you're creating custom nodes.
+
+<br>
+
+# How it Works
+
+`ändern` uses trees, composed of [`Node`s](#nodes), for tracking changes across objects. Each node is an [`Observable`](https://rxjs.dev/guide/observable) and an [`Observer`](https://rxjs.dev/guide/observer) for a designated part of the tree, represented by some [JSON pointer](https://gregsdennis.github.io/Manatee.Json/usage/pointer.html). For an object (tree) like this:
+
+```js
+const object = {
+  people: [
+    { name: 'John', age: 20 },
+    { name: 'Jane', age: 21 },
+  ],
+  orgname: 'ACME',
 }
 ```
 
-A child node is created by minor modifications to the up and downstreams of the parent node. Patches coming from child nodes will have their path attached to their operations before being up-propagated. Patches coming from downstream will first be checked to match the child node's path, and then have their path stripped before being down-propagated.
+You can track (or apply) changes to the organisation name like this:
 
-👉 [**See this in action**](https://codepen.io/lorean_victor/full/vYvBZKa).
+```ts
+const root = createRoot(object)
+const orgname = root.child('/orgname')
+```
+
+and you can track (or apply) changes to the first person's name like this:
+
+```ts
+const john = root.child('/people/0/name')
+```
+
+> **IMPORTANT**
+>
+> `ändern` does not track changes to the object itself, i.e it does not create proxies, or alter the original object in any way. A `Node` can only track changes that are applied by some other nodes in the same tree (i.e. having the same root).
+
+<br>
+
+When a node is requested to change (through its `.set()`, `.remove()`, `.patch()`, or `.next()` methods), it will calculate the necessary changes and send them to its _upstream_. In case of `.next()`, it diffs the current value and the _next_ value for calculating the patch (so its slower to use `.next()` compared to other methods).
+
+The calculated patch won't be applied immediately, it will be sent to the _upstream_ first, where the parent will correct the _path_ of the patch, and send it upwards again. Eventually, the patch is bounced back by the root node (if it is a valid change), and will be downpropagated across the tree to nodes with a matching path (with the path again being corrected for each child node that receives the patch). During this process, the originating node will also receive the same patch from its _downstream_, applying the patch and notifying its subscribers.
+
+The whole process looks like this (you can also checkout the [live demo](https://codepen.io/lorean_victor/full/vYvBZKa)):
 
 <div align="center">
 <img src="./misc/readme-diagram.svg#gh-dark-mode-only" width="640px"/>
