@@ -203,7 +203,9 @@ const root = new Node(
 
 ### Safety
 
-A `Node` receiving a patch that it can't apply will result in an error, closing the stream. If you want to ignore such erroneous patches, use `SafeNode` class instead.
+A `Node` receiving a patch that it can't apply will result in an error, closing the stream. This can happen, when for example another node sends a conflicting patch earlier.
+
+Use `SafeNode` class to ignore erroneous patches.
 
 ```ts
 import { SafeNode } from 'andern'
@@ -240,7 +242,7 @@ const root = createRoot(object)
 const orgname = root.child('/orgname')
 ```
 
-and you can track (or apply) changes to the first person's name like this:
+you can track (or apply) changes to the first person's name like this:
 
 ```ts
 const john = root.child('/people/0/name')
@@ -254,25 +256,25 @@ const john = root.child('/people/0/name')
 
 <br>
 
-#### Step 1: Initialisation
+### Step 1: Initialisation
 
-When a change is requested (through its `.set()`, `.remove()`, `.patch()`, or `.next()` methods), the node will NOT apply the change, but will calculate the necessary changes and sends them, as a patch, to its _upstream_ (i.e. its parent).
+When a change is requested (through `.set()`, `.remove()`, `.patch()`, or `.next()` methods), the node will NOT apply the change, instead calculating the necessary alterations and sends them, as a [patch](https://jsonpatch.com), to its parent (via its _upstream_).
 
-> ⚠️ _`.next()` requires to diff the node's value with the given value to calculate the necessary patch, making it computationally expensive compared to other mutation methods._
-
-<br>
-
-#### Step 2: Up-propagation
-
-The parent updates the patch's _path_ to reflect the address of the child sending it, then sends it through its own upstream. Eventually, it reach the root node and is bounced back (if they are valid).
-
-> 💡 _The root note is like other nodes, except its downstream and upstream are the same, resulting in it bouncing back any received patches. The root created by `createdRoot()` is a [`SafeNode`](#safety), meaning it will also check validity of bounced patches._
+> ⚠️ _`.next()` compares the node's current and given values to calculate the patch, making it computationally expensive compared to other mutation methods._
 
 <br>
 
-#### Step 3: Down-propagation
+### Step 2: Up-propagation
 
-The patch is then downpropagated by each node to its matching children, correcting the path for recipient children as well. During this, the originating node will also receive the same patch, applying it and notifying subscribers.
+The parent updates the patch's _path_ so that it reflects the child it originated from, then sends it to its own parent. Eventually, the patch reaches the root and is bounced back ([if valid](#safety)).
+
+> 💡 _The root is like other nodes, except its downstream and upstream are the same (a [`Subject`](https://rxjs.dev/guide/subject)), resulting in the root bouncing back patches it receives. The root created by `createdRoot()` is a [`SafeNode`](#safety), so it also checks validity of bounced patches, dropping invalid ones._
+
+<br>
+
+### Step 3: Down-propagation
+
+Starting with the root, each node, then sends the patch to its matching children, recorrecting the path as well. Each node also applies the patch to its value and notifies its subscribers. The patch eventually reaches the originating node, which does the same.
 
 > 💡 _This is basically a master / replica model, where the root node acts as the master and all other nodes are replicas. The root node determines the final **correct** order of changes to be applied to all nodes, resolving potential conflicts._
 
