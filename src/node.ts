@@ -36,6 +36,14 @@ export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeL
     return this
   }
 
+  channel(): PatchChannel {
+    return {
+      next: this.patch.bind(this),
+      error: this.error.bind(this),
+      complete: this.complete.bind(this),
+    }
+  }
+
   set(path: string, value: any): this {
     return this.patch([{ op: 'replace', path, value }])
   }
