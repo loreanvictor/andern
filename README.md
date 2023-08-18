@@ -246,26 +246,37 @@ and you can track (or apply) changes to the first person's name like this:
 const john = root.child('/people/0/name')
 ```
 
+<br>
+
 > **IMPORTANT**
 >
-> `ändern` does not track changes to the object itself, i.e it does not create proxies, or alter the original object in any way. A `Node` can only track changes that are applied by some other nodes in the same tree (i.e. having the same root).
+> `ändern` does not track changes made to objects directly, i.e it does not create proxies, or alter the original objects in any way. A `Node` can only track changes that are applied via some other nodes in the same tree.
 
 <br>
 
+#### Step 1: Initialisation
+
 When a change is requested (through its `.set()`, `.remove()`, `.patch()`, or `.next()` methods), the node will NOT apply the change, but will calculate the necessary changes and sends them, as a patch, to its _upstream_ (i.e. its parent).
 
-> **WARNING**
->
-> `.next()` requires to diff the node's value with the given value to calculate the necessary patch, making it computationally expensive compared to other mutation methods.
+> ⚠️ _`.next()` requires to diff the node's value with the given value to calculate the necessary patch, making it computationally expensive compared to other mutation methods._
+
+<br>
+
+#### Step 2: Up-propagation
 
 The parent updates the patch's _path_ to reflect the address of the child sending it, then sends it through its own upstream. Eventually, it reach the root node and is bounced back (if they are valid).
 
 > 💡 _The root note is like other nodes, except its downstream and upstream are the same, resulting in it bouncing back any received patches. The root created by `createdRoot()` is a [`SafeNode`](#safety), meaning it will also check validity of bounced patches._
 
+<br>
+
+#### Step 3: Down-propagation
+
 The patch is then downpropagated by each node to its matching children, correcting the path for recipient children as well. During this, the originating node will also receive the same patch, applying it and notifying subscribers.
 
-
 > 💡 _This is basically a master / replica model, where the root node acts as the master and all other nodes are replicas. The root node determines the final **correct** order of changes to be applied to all nodes, resolving potential conflicts._
+
+<br>
 
 The whole process looks like this (you can also checkout the [live demo](https://codepen.io/lorean_victor/full/vYvBZKa)):
 
