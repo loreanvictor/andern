@@ -15,6 +15,7 @@ export interface ReadOnlyNodeLike<T> extends Observable<T> {
 
 
 export interface NodeLike<T> extends ReadOnlyNodeLike<T>, Observer<T> {
+  get channel(): PatchChannel
   child(path: string): NodeLike<any>
   read(path: string): ReadOnlyNodeLike<any>
 

@@ -23,8 +23,8 @@ export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeL
 
   override child(path: string): NodeLike<any> {
     return new Node(
-      this.childValue(path),
-      this.childChannel(path),
+      this.sub(path),
+      this.subchannel(path),
     )
   }
 
@@ -58,9 +58,9 @@ export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeL
     this.channel.complete()
   }
 
-  protected childChannel(path: string): PatchChannel {
+  protected subchannel(path: string): PatchChannel {
     return bundle(
-      this.childStream(path),
+      this.substream(path),
       {
         next: patch => this.channel.next(patch.map(({ path: p, ...rest }) => ({ ...rest, path: path + p }))),
         error: () => {},

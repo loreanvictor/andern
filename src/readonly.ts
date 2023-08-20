@@ -28,18 +28,18 @@ export class ReadOnlyNode<T extends JsonObject> extends Observable<T> implements
   }
 
   child(path: string): ReadOnlyNodeLike<any> {
-    return new ReadOnlyNode(this.childValue(path), this.childStream(path))
+    return new ReadOnlyNode(this.sub(path), this.substream(path))
   }
 
   read(path: string): ReadOnlyNodeLike<any> {
     return this.child(path)
   }
 
-  protected childValue(path: string): any {
+  protected sub(path: string): any {
     return get(this.value, path)
   }
 
-  protected childStream(path: string): PatchStream {
+  protected substream(path: string): PatchStream {
     return this.patches.pipe(
       map(patch => patch
         .filter(({ path: p }) => p.startsWith(path))
