@@ -3,21 +3,23 @@ import { validate } from 'fast-json-patch'
 import { filter } from 'rxjs'
 
 import { Node } from './node'
-import { PatchChannel, PatchStream } from './types'
+import { PatchChannel } from './types'
+import { bundle } from './utils'
 
 
 export class SafeNode<T extends JsonObject> extends Node<T> {
   constructor(
     value: T,
-    downstream: PatchStream,
-    upstream: PatchChannel,
+    channel: PatchChannel,
   ) {
     super(
       value,
-      downstream.pipe(
-        filter(patch => !validate(patch, this.value))
-      ),
-      upstream
+      bundle(
+        channel.pipe(
+          filter(patch => !validate(patch, this.value))
+        ),
+        channel
+      )
     )
   }
 }

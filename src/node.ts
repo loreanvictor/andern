@@ -2,16 +2,19 @@ import { JsonObject } from 'json-pointer'
 import { Operation, compare } from 'fast-json-patch'
 
 import { ReadOnlyNode } from './readonly'
-import { NodeLike, Patch, PatchChannel, PatchStream, ReadOnlyNodeLike } from './types'
+import { NodeLike, Patch, PatchChannel, ReadOnlyNodeLike } from './types'
+import { bundle } from './utils'
 
 
 export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeLike<T> {
+  readonly channel: PatchChannel
+
   constructor(
     initial: T,
-    downstream: PatchStream,
-    protected upstream: PatchChannel
+    channel: PatchChannel,
   ) {
-    super(initial, downstream)
+    super(initial, channel)
+    this.channel = bundle(this.patches, channel)
   }
 
   override read(path: string): ReadOnlyNodeLike<any> {
@@ -21,27 +24,18 @@ export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeL
   override child(path: string): NodeLike<any> {
     return new Node(
       this.childValue(path),
-      this.childStream(path),
       this.childChannel(path),
     )
   }
 
   patch(patch: Patch | Operation): this {
     if (Array.isArray(patch)) {
-      this.upstream.next(patch)
+      this.channel.next(patch)
     } else {
-      this.upstream.next([patch])
+      this.channel.next([patch])
     }
 
     return this
-  }
-
-  channel(): PatchChannel {
-    return {
-      next: this.patch.bind(this),
-      error: this.error.bind(this),
-      complete: this.complete.bind(this),
-    }
   }
 
   set(path: string, value: any): this {
@@ -53,22 +47,25 @@ export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeL
   }
 
   next(value: T): void {
-    this.upstream.next(compare(this.value, value))
+    this.channel.next(compare(this.value, value))
   }
 
   error(err: any): void {
-    this.upstream.error(err)
+    this.channel.error(err)
   }
 
   complete(): void {
-    this.upstream.complete()
+    this.channel.complete()
   }
 
   protected childChannel(path: string): PatchChannel {
-    return {
-      next: patch => this.upstream.next(patch.map(({ path: p, ...rest }) => ({ ...rest, path: path + p }))),
-      error: () => {},
-      complete: () => {},
-    }
+    return bundle(
+      this.childStream(path),
+      {
+        next: patch => this.channel.next(patch.map(({ path: p, ...rest }) => ({ ...rest, path: path + p }))),
+        error: () => {},
+        complete: () => {},
+      }
+    )
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "andern",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "change propagation for object trees",
   "main": "dist/commonjs/index.js",
   "module": "dist/es/index.js",

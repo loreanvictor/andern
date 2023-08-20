@@ -2,15 +2,13 @@ export * from './types'
 export * from './readonly'
 export * from './node'
 export * from './safe'
-export * from './echo'
+export * from './utils'
 
 import { JsonObject } from 'json-pointer'
 
-import { createEcho } from './echo'
+import { createEcho } from './utils'
 import { SafeNode } from './safe'
 
 export const createRoot = <T extends JsonObject>(initial: T) => {
-  const echo = createEcho()
-
-  return new SafeNode(initial, echo, echo)
+  return new SafeNode(initial, createEcho())
 }

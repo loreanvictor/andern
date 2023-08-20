@@ -4,7 +4,7 @@ import { Operation } from 'fast-json-patch'
 
 export type Patch = Operation[]
 export type PatchStream = Observable<Patch>
-export type PatchChannel = Observer<Patch>
+export type PatchChannel = PatchStream & Observer<Patch>
 
 
 export interface ReadOnlyNodeLike<T> extends Observable<T> {

@@ -156,13 +156,11 @@ class Node<T>
 
   constructor(
     initial:  T,
-    downstream: PatchStream,
-    upstream: PatchChannel,
+    channel: PatchChannel,
   );
 
   read(path: string): ReadonlyNode<T>;
   child(path: string): Node<T>;
-  channel(): Observer<Patch>;
   patch(patch: Patch | Operation): this;
   set(path: string, value: any): this;  
   remove(path: string): this;
@@ -171,27 +169,29 @@ class Node<T>
 }
 ```
 
-To create a `Node`, you need an _upstream_ and a _downstream_:
+To create a `Node`, you need a _channel_, which:
 
-- _downstream_ should be a [`PatchStream`](./src/types.ts) (i.e. [`Observable`](https://rxjs.dev/guide/observable)[`<Patch>`](https://jsonpatch.com)), through which the parent informs the node of changes to its value.
+- is an [`Observable`](https://rxjs.dev/guide/observable) of [patches](https://jsonpatch.com), through which the parent informs the node of changes to its value.
 
-- _upstream_ should be a [`PatchChannel`](./src/types.ts) (i.e. [`Observer`](https://rxjs.dev/guide/observer)[`<Patch>`](https://jsonpatch.com)), through which the node informs its parent of requested changes to its value.
+- is an [`Observer`](https://rxjs.dev/guide/observer) of [patches](https://jsonpatch.com), through which the node informs its parent of requested changes to its value.
 
 <br>
 
-When a node is requested to change (through its `.set()`, `.remove()`, `.patch()`, or `.next()` methods), it will calculate the necessary changes and send them to _upstream_. It will apply the changes when they are received from the _downstream_, notifying subscribers ([read more](#how-it-works)).
+When a node is requested to change (through its `.set()`, `.remove()`, `.patch()`, or `.next()` methods), it calculates the necessary changes and sends them to the parent (via its _channel_). It will apply the changes when they are received from the _channel_, notifying subscribers ([read more](#how-it-works)).
 
-Use this to create nodes with custom behavior. For example, this is a _root node_ that debounces incoming changes:
+👉 Use `bundle()` to combine an `Observable` and an `Observer` to create channels. For example, this is a _root node_ that debounces incoming changes:
 
 ```ts
-import { Node } from 'andern'
+import { Node, bundle } from 'andern'
 import { Subject, debounceTime } from 'rxjs'
 
 const bounce = new Subject()
 const root = new Node(
-  { /* some initial value */},
-  bounce.pipe(debounceTime(100)),
-  bounce,
+  intialValue,
+  bundle(
+    bounce.pipe(debounceTime(100)),
+    bounce,
+  )
 )
 ```
 
@@ -258,7 +258,7 @@ const john = root.child('/people/0/name')
 
 ### Step 1: Initialisation
 
-When a change is requested (through `.set()`, `.remove()`, `.patch()`, or `.next()` methods), the node will NOT apply the change, instead calculating the necessary alterations and sends them, as a [patch](https://jsonpatch.com), to its parent (via its _upstream_).
+When a change is requested (through `.set()`, `.remove()`, `.patch()`, or `.next()` methods), the node will NOT apply the change, instead calculating the necessary alterations and sends them, as a [patch](https://jsonpatch.com), to its parent (via its _channel_).
 
 > ⚠️ _`.next()` compares the node's current and given values to calculate the patch, making it computationally expensive compared to other mutation methods._
 
@@ -268,7 +268,7 @@ When a change is requested (through `.set()`, `.remove()`, `.patch()`, or `.next
 
 The parent updates the patch's _path_ so that it reflects the child it originated from, then sends it to its own parent. Eventually, the patch reaches the root and is bounced back ([if valid](#safety)).
 
-> 💡 _The root is like other nodes, except its downstream and upstream are the same (a [`Subject`](https://rxjs.dev/guide/subject)), resulting in the root bouncing back incoming patches. The root created by `createdRoot()` is a [`SafeNode`](#safety), so it also checks validity of bounced patches, dropping invalid ones._
+> 💡 _The root is like other nodes, except its channel is a  [`Subject`](https://rxjs.dev/guide/subject), bouncing back any patches it receives. The root created by `createdRoot()` is a [`SafeNode`](#safety), so it also checks validity of bounced patches, dropping invalid ones._
 
 <br>
 

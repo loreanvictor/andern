@@ -12,7 +12,7 @@ export class ReadOnlyNode<T extends JsonObject> extends Observable<T> implements
 
   constructor(
     initial: T,
-    protected downstream: PatchStream
+    protected stream: PatchStream
   ) {
     super(subscriber => {
       subscriber.next(this.value)
@@ -20,7 +20,7 @@ export class ReadOnlyNode<T extends JsonObject> extends Observable<T> implements
     })
 
     this.value = initial
-    this.patches = this.downstream.pipe(
+    this.patches = this.stream.pipe(
       tap(patch => this.value = applyPatch(this.value, patch).newDocument),
       share(),
     )

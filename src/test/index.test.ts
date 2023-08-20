@@ -97,13 +97,13 @@ test('nodes can distinguish changes and propagate them properly.', () => {
   expect(cb3).toHaveBeenNthCalledWith(2, JSON.stringify({ fluff: 43 }))
 })
 
-test('nodes can be treated as patch observer.', () => {
+test('nodes can be treated as a patch channel.', () => {
   const sub = new Subject<Patch>()
   const root = createRoot({ foo: 'bar' })
 
   const cb = jest.fn()
   root.read('/foo').subscribe(cb)
-  sub.subscribe(root.channel())
+  sub.subscribe(root.channel)
   sub.next([{ op: 'replace', path: '/foo', value: 'qux' }])
 
   expect(cb).toHaveBeenCalledTimes(2)
@@ -113,7 +113,7 @@ test('nodes can be treated as patch observer.', () => {
 
 test('nodes up propagate errors.', () => {
   const echo = createEcho()
-  const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, echo, echo)
+  const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, echo)
 
   const cb = jest.fn()
   echo.subscribe({ error: cb })
@@ -125,7 +125,7 @@ test('nodes up propagate errors.', () => {
 
 test('nodes up propagate completion.', () => {
   const echo = createEcho()
-  const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, echo, echo)
+  const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, echo)
 
   const cb = jest.fn()
   echo.subscribe({ complete: cb })
@@ -136,8 +136,7 @@ test('nodes up propagate completion.', () => {
 })
 
 test('children seeing errors or completion will not propagate them up.', () => {
-  const echo = createEcho()
-  const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, echo, echo)
+  const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, createEcho())
 
   const cb = jest.fn()
   root.subscribe({ error: cb, complete: cb })
@@ -149,8 +148,7 @@ test('children seeing errors or completion will not propagate them up.', () => {
 })
 
 test('nodes accept single operations for patching.', () => {
-  const echo = createEcho()
-  const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, echo, echo)
+  const root = new Node({ foo: 'bar', baz: [{ fluff: 42 }] }, createEcho())
 
   const cb1 = jest.fn()
   const cb2 = jest.fn()
