@@ -22,3 +22,7 @@ class Bundled<T> extends Observable<T> implements Observer<T> {
 
 export const bundle = <T>(src: Observable<T>, sink: Observer<T>) =>
   new Bundled(src, sink)
+
+
+export const createId = () => Math.random().toString(36).slice(2)
+export const noop = () => {}

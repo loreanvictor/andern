@@ -2,7 +2,9 @@ export * from './types'
 export * from './readonly'
 export * from './node'
 export * from './safe'
+export * from './persist'
 export * from './utils'
+
 
 import { JsonObject } from 'json-pointer'
 

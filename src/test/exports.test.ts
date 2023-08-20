@@ -1,5 +1,5 @@
 import {
-  createEcho, ReadOnlyNode, ReadOnlyNodeLike, NodeLike, Patch, PatchChannel, PatchStream, Node, SafeNode, bundle,
+  createEcho, ReadOnlyNode, ReadOnlyNodeLike, NodeLike, Patch, PatchChannel, PatchStream, Node, SafeNode, bundle, PersistedNode,
 } from '../index'
 
 
@@ -8,6 +8,7 @@ test('everything is exported.', () => {
   expect(ReadOnlyNode).toBeDefined()
   expect(Node).toBeDefined()
   expect(SafeNode).toBeDefined()
+  expect(PersistedNode).toBeDefined()
   expect(<ReadOnlyNodeLike<unknown>>{}).toBeDefined()
   expect(<NodeLike<unknown>>{}).toBeDefined()
   expect(<Patch>{}).toBeDefined()

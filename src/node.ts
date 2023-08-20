@@ -3,7 +3,7 @@ import { Operation, compare } from 'fast-json-patch'
 
 import { ReadOnlyNode } from './readonly'
 import { NodeLike, Patch, PatchChannel, ReadOnlyNodeLike } from './types'
-import { bundle } from './utils'
+import { bundle, noop } from './utils'
 
 
 export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeLike<T> {
@@ -63,8 +63,8 @@ export class Node<T extends JsonObject> extends ReadOnlyNode<T> implements NodeL
       this.substream(path),
       {
         next: patch => this.channel.next(patch.map(({ path: p, ...rest }) => ({ ...rest, path: path + p }))),
-        error: () => {},
-        complete: () => {},
+        error: noop,
+        complete: noop,
       }
     )
   }

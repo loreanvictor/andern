@@ -2,9 +2,12 @@ import { Observable, Observer } from 'rxjs'
 import { Operation } from 'fast-json-patch'
 
 
+export type Channel<T> = Observable<T> & Observer<T>
+
+
 export type Patch = Operation[]
 export type PatchStream = Observable<Patch>
-export type PatchChannel = PatchStream & Observer<Patch>
+export type PatchChannel = Channel<Patch>
 
 
 export interface ReadOnlyNodeLike<T> extends Observable<T> {
@@ -24,3 +27,9 @@ export interface NodeLike<T> extends ReadOnlyNodeLike<T>, Observer<T> {
   remove(path: string): this
 }
 
+
+export interface Message {
+  sender: string
+  patch: Patch
+}
+export type MessageChannel = Channel<Message>
