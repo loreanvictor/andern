@@ -48,6 +48,7 @@ root.child('/people').patch({ op: 'remove', path: '/1/age' })
 - [Advanced Usage](#advanced-usage)
   - [Nodes](#nodes)
   - [Safety](#safety)
+  - [Persistence](#persistence)
 - [How it Works](#how-it-works)
 - [Contribution](#contribution)
 
