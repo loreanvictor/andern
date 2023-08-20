@@ -221,6 +221,25 @@ const root = new SafeNode(
 
 <br>
 
+### Persistence
+
+For simple persistence, you can subscribe to the root node of the tree and save the object upon changes. If, however, you need more than one root node (or persisting node), all sharing the same storage, then this solution would NOT work.
+
+In such cases, use the `PersistedNode` class. It differs from a normal `Node` in that it will attach sender info (its own identifier) alongside the patch data to its channel, and then stores changes when it receives its own messages from the channel. This way, you can have multiple nodes distributing the load of persisting changes without doing redundant work.
+
+```ts
+class PersistedNode<T> extends Node<T> {
+  constructor(
+    initial: T,
+    persist: (patch: Patch) => Promise<void>,
+    channel: MessageChannel,
+    identifier?: string
+  )
+}
+```
+
+<br>
+
 # How it Works
 
 `ändern` uses trees, composed of [`Node`](#nodes)s, for tracking changes across objects. Each node is an [`Observable`](https://rxjs.dev/guide/observable) and an [`Observer`](https://rxjs.dev/guide/observer) for a designated part of the tree, represented by some [JSON pointer](https://gregsdennis.github.io/Manatee.Json/usage/pointer.html). For an object (tree) like this:
