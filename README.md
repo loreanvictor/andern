@@ -93,6 +93,8 @@ const root = createRoot({
 const john = root.child('/people/0')
 ```
 
+> **NOTE**
+> 
 > Child nodes are specified in [JSON Pointer](https://gregsdennis.github.io/Manatee.Json/usage/pointer.html) format.
 
 <br>
