@@ -1,6 +1,6 @@
 <div align="right">
 
-[![bundle size](https://img.shields.io/bundlephobia/minzip/andern@latest?color=black&label=&style=flat-square)](https://bundlephobia.com/package/andern@latest)
+[![npm package minimized gzipped size](https://img.shields.io/bundlejs/size/andern?style=flat-square&label=%20&color=black)](https://bundlejs.com/?q=andern)
 [![version](https://img.shields.io/npm/v/andern?color=black&label=&style=flat-square)](https://www.npmjs.com/package/andern)
 [![tests](https://img.shields.io/github/actions/workflow/status/loreanvictor/andern/coverage.yml?label=&style=flat-square)](https://github.com/loreanvictor/andern/actions/workflows/coverage.yml)
 
