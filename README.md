@@ -120,6 +120,8 @@ john.add('/title', 'Dr.')
 john.remove('/age')
 ```
 
+> **NOTE**
+> 
 > To change the whole object, use `''` as the path. Alternatively, you can use `node.next(...)`, as each node is also an [observer](https://rxjs.dev/guide/observer).
 
 <br>
@@ -134,6 +136,8 @@ john.patches.subscribe(console.log)
 john.patch({ op: 'replace', path: '/name', value: 'Johnny' })
 ```
 
+> **NOTE**
+> 
 > Changes are expressed in [JSON Patch](https://jsonpatch.com) format.
 
 <br>
@@ -220,6 +224,8 @@ const root = new SafeNode(
 
 <br>
 
+> **NOTE**
+> 
 > `createRoot()` uses `SafeNode` by default, so you don't need to worry about safety in normal use cases. You need to think about it only if you're creating custom nodes.
 
 <br>
@@ -282,7 +288,9 @@ const john = root.child('/people/0/name')
 
 When a change is requested (through `.set()`, `.remove()`, `.patch()`, or `.next()` methods), the node will NOT apply the change, instead calculating the necessary alterations and sends them, as a [patch](https://jsonpatch.com), to its parent (via its _channel_).
 
-> ⚠️ _`.next()` compares the node's current and given values to calculate the patch, making it computationally expensive compared to other mutation methods._
+> **WARNING**
+> 
+> _`.next()` compares the node's current and given values to calculate the patch, making it computationally expensive compared to other mutation methods._
 
 <br>
 
@@ -290,7 +298,9 @@ When a change is requested (through `.set()`, `.remove()`, `.patch()`, or `.next
 
 The parent updates the patch's _path_ so that it reflects the child it originated from, then sends it to its own parent. Eventually, the patch reaches the root and is bounced back ([if valid](#safety)).
 
-> 💡 _The root is like other nodes, except its channel is a  [`Subject`](https://rxjs.dev/guide/subject), bouncing back any patches it receives. The root created by `createdRoot()` is a [`SafeNode`](#safety), so it also checks validity of bounced patches, dropping invalid ones._
+> **NOTE**
+> 
+> _The root is like other nodes, except its channel is a  [`Subject`](https://rxjs.dev/guide/subject), bouncing back any patches it receives. The root created by `createdRoot()` is a [`SafeNode`](#safety), so it also checks validity of bounced patches, dropping invalid ones._
 
 <br>
 
@@ -298,7 +308,9 @@ The parent updates the patch's _path_ so that it reflects the child it originate
 
 Starting with the root, each node then sends the patch to its matching children, recorrecting the path for each matching child. Each node also applies the patch and notifies its subscribers. The patch eventually reaches the originating node, which does the same.
 
-> 💡 _This is basically a master / replica model, where the root node acts as the master and all other nodes are replicas. The root node determines the **correct** order of changes, resolving potential conflicts._
+> **NOTE**
+> 
+> _This is basically a master / replica model, where the root node acts as the master and all other nodes are replicas. The root node determines the **correct** order of changes, resolving potential conflicts._
 
 <br>
 
